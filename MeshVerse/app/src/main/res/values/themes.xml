@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MeshVerse" parent="android:Theme.Material.NoTitleBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+    <style name="Theme.MeshVerse.SplashScreen" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#0A0E1A</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.MeshVerse</item>
+    </style>
+</resources>

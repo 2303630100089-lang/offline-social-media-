@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MeshVerse</string>
+    <string name="mesh_service_notification_title">MeshVerse Active</string>
+    <string name="mesh_service_notification_text">Mesh network running — %1$d peers connected</string>
+    <string name="offline_mode">Offline Mode</string>
+    <string name="connecting">Connecting…</string>
+    <string name="no_peers">No nearby peers found</string>
+    <string name="payment_disclaimer">Prototype only. Not real banking infrastructure.</string>
+</resources>
