@@ -10,7 +10,8 @@ import androidx.room.PrimaryKey
         Index("conversationId"),
         Index("senderId"),
         Index("timestamp"),
-        Index("status")
+        Index("status"),
+        Index("packetId", unique = true)
     ]
 )
 data class MessageEntity(

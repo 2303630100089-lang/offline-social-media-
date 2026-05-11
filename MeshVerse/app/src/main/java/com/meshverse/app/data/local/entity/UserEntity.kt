@@ -1,9 +1,13 @@
 package com.meshverse.app.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "users")
+@Entity(
+    tableName = "users",
+    indices = [Index("publicKey", unique = true)]
+)
 data class UserEntity(
     @PrimaryKey val userId: String,
     val username: String,
