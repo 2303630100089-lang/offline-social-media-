@@ -40,6 +40,7 @@ class KeyManager {
     @Synchronized
     fun getLastRotationAt(): Long = lastRotationAt
 
+    @Synchronized
     fun getPublicKeyBase64(): String {
         val kp = getOrCreateIdentityKeyPair()
         return Base64.encodeToString(kp.public.encoded, Base64.NO_WRAP)

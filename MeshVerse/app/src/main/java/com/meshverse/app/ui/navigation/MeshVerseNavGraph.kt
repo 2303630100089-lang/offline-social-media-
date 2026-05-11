@@ -4,14 +4,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -19,12 +15,19 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -50,12 +53,7 @@ private val bottomDestinations = listOf(
     Destination("feed", "Feed", Icons.Default.Groups),
     Destination("map", "Maps", Icons.Default.Map),
     Destination("ai", "AI", Icons.Default.SmartToy),
-    Destination("media", "Files", Icons.Default.Folder),
-    Destination("apps", "MiniApps", Icons.Default.Build),
-    Destination("groups", "Groups", Icons.Default.Groups),
-    Destination("profile", "Profile", Icons.Default.Person),
-    Destination("settings", "Settings", Icons.Default.Settings),
-    Destination("emergency", "SOS", Icons.Default.Warning),
+    Destination("more", "More", Icons.Default.Build),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,12 +95,36 @@ fun MeshVerseNavGraph(viewModel: MainViewModel = hiltViewModel()) {
             composable("feed") { FeedScreen(viewModel) }
             composable("map") { MapScreen(viewModel) }
             composable("ai") { AiAssistantScreen(viewModel) }
+            composable("more") { MoreScreen(navController) }
             composable("apps") { MiniAppsScreen() }
             composable("media") { MediaShareScreen(viewModel) }
             composable("groups") { GroupsScreen(viewModel) }
             composable("profile") { ProfileScreen(viewModel) }
             composable("settings") { SettingsScreen() }
             composable("emergency") { EmergencyScreen(viewModel) }
+        }
+    }
+}
+
+@Composable
+private fun MoreScreen(navController: NavHostController) {
+    val options = listOf(
+        "Media Sharing" to "media",
+        "Mini Apps" to "apps",
+        "Groups" to "groups",
+        "Profile" to "profile",
+        "Settings" to "settings",
+        "Emergency" to "emergency"
+    )
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        options.forEach { (label, route) ->
+            Text(
+                text = label,
+                modifier = Modifier.clickable { navController.navigate(route) }
+            )
         }
     }
 }
