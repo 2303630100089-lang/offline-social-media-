@@ -17,6 +17,7 @@ class KeyManager {
     private var identityKeyPair: KeyPair? = null
     private var lastRotationAt: Long = 0L
 
+    @Synchronized
     fun generateIdentityKeyPair(): KeyPair {
         val kpg = KeyPairGenerator.getInstance("EC")
         kpg.initialize(ECGenParameterSpec("secp256r1"), SecureRandom())
@@ -25,15 +26,18 @@ class KeyManager {
         return kp
     }
 
+    @Synchronized
     fun getOrCreateIdentityKeyPair(): KeyPair {
         return identityKeyPair ?: generateIdentityKeyPair()
     }
 
+    @Synchronized
     fun rotateIdentityKeyPair(): KeyPair {
         lastRotationAt = System.currentTimeMillis()
-        return generateIdentityKeyPair()
+        return generateIdentityKeyPair().also { identityKeyPair = it }
     }
 
+    @Synchronized
     fun getLastRotationAt(): Long = lastRotationAt
 
     fun getPublicKeyBase64(): String {

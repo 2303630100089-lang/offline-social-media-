@@ -5,9 +5,6 @@ import com.google.gson.Gson
 import com.meshverse.app.domain.model.MeshPacket
 import com.meshverse.app.domain.model.PacketType
 import com.meshverse.app.mesh.MeshNetworkManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
@@ -29,7 +26,7 @@ class MediaTransferManager @Inject constructor(
         val dataBase64: String
     )
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    data class TransferSummary(val chunkCount: Int, val checksum: String)
 
     fun chunkCount(data: ByteArray, chunkSize: Int = DEFAULT_CHUNK_SIZE): Int =
         (data.size + chunkSize - 1) / chunkSize
@@ -39,13 +36,19 @@ class MediaTransferManager @Inject constructor(
         .digest(data)
         .joinToString("") { "%02x".format(it) }
 
-    fun sendMedia(peerId: String, fileName: String, mimeType: String, data: ByteArray, chunkSize: Int = DEFAULT_CHUNK_SIZE) {
+    suspend fun sendMedia(
+        peerId: String,
+        fileName: String,
+        mimeType: String,
+        data: ByteArray,
+        chunkSize: Int = DEFAULT_CHUNK_SIZE
+    ): TransferSummary {
         val total = chunkCount(data, chunkSize)
         val mediaId = UUID.randomUUID().toString()
         val checksum = sha256(data)
         val source = meshNetworkManager.getLocalNodeId().ifBlank { "local-node" }
 
-        (0 until total).forEach { index ->
+        for (index in 0 until total) {
             val start = index * chunkSize
             val end = minOf(start + chunkSize, data.size)
             val chunk = data.copyOfRange(start, end)
@@ -58,20 +61,18 @@ class MediaTransferManager @Inject constructor(
                 checksum = checksum,
                 dataBase64 = Base64.encodeToString(chunk, Base64.NO_WRAP)
             )
-
-            scope.launch {
-                meshNetworkManager.sendPacket(
-                    MeshPacket(
-                        sourceId = source,
-                        destinationId = peerId,
-                        senderId = source,
-                        payloadType = PacketType.MEDIA_CHUNK,
-                        payload = gson.toJson(envelope).toByteArray(),
-                        ttl = 6
-                    )
+            meshNetworkManager.sendPacket(
+                MeshPacket(
+                    sourceId = source,
+                    destinationId = peerId,
+                    senderId = source,
+                    payloadType = PacketType.MEDIA_CHUNK,
+                    payload = gson.toJson(envelope).toByteArray(),
+                    ttl = 6
                 )
-            }
+            )
         }
+        return TransferSummary(total, checksum)
     }
 
     companion object {

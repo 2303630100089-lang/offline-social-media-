@@ -126,13 +126,16 @@ class MainViewModel @Inject constructor(
         if (text.isBlank()) return
         viewModelScope.launch {
             postRepository.createPost(
-                Post(
-                    postId = UUID.randomUUID().toString(),
-                    authorId = localUser.value?.userId ?: "local",
-                    content = text,
-                    postType = PostType.POST,
-                    tags = text.split(" ").filter { it.startsWith("#") }
-                )
+                    Post(
+                        postId = UUID.randomUUID().toString(),
+                        authorId = localUser.value?.userId ?: "local",
+                        content = text,
+                        postType = PostType.POST,
+                        tags = Regex("#([A-Za-z0-9_]+)")
+                            .findAll(text)
+                            .map { it.groupValues[1] }
+                            .toList()
+                    )
             )
         }
     }
