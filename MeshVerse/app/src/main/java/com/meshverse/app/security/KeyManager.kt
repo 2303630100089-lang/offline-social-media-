@@ -15,6 +15,7 @@ import javax.crypto.KeyAgreement
 class KeyManager {
 
     private var identityKeyPair: KeyPair? = null
+    private var lastRotationAt: Long = 0L
 
     fun generateIdentityKeyPair(): KeyPair {
         val kpg = KeyPairGenerator.getInstance("EC")
@@ -27,6 +28,13 @@ class KeyManager {
     fun getOrCreateIdentityKeyPair(): KeyPair {
         return identityKeyPair ?: generateIdentityKeyPair()
     }
+
+    fun rotateIdentityKeyPair(): KeyPair {
+        lastRotationAt = System.currentTimeMillis()
+        return generateIdentityKeyPair()
+    }
+
+    fun getLastRotationAt(): Long = lastRotationAt
 
     fun getPublicKeyBase64(): String {
         val kp = getOrCreateIdentityKeyPair()
