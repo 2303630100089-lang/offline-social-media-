@@ -131,7 +131,7 @@ class MainViewModel @Inject constructor(
                         authorId = localUser.value?.userId ?: "local",
                         content = text,
                         postType = PostType.POST,
-                        tags = Regex("#([A-Za-z0-9_]+)")
+                        tags = Regex("""(?:^|\s)#([A-Za-z0-9_]+)""")
                             .findAll(text)
                             .map { it.groupValues[1] }
                             .toList()
