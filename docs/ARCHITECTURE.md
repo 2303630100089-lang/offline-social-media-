@@ -99,7 +99,7 @@ MeshVerse/
 │   │   │   │       ├── MessageRepository.kt
 │   │   │   │       ├── PeerRepository.kt
 │   │   │   │       └── SyncRepository.kt
-│   │   ���   ├── domain/
+│   │   │   ├── domain/
 │   │   │   │   ├── usecase/
 │   │   │   │   │   ├── SendMessageUseCase.kt
 │   │   │   │   │   ├── DiscoverPeersUseCase.kt
