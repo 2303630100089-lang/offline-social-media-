@@ -15,6 +15,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -54,8 +55,15 @@ class MeshNetworkManager @Inject constructor(
     // Track active Nearby connections: endpointId -> Peer
     private val activeConnections = ConcurrentHashMap<String, Peer>()
 
-    // Seen packet IDs to prevent loops/duplicates
-    private val seenPackets = ConcurrentHashMap.newKeySet<String>()
+    // Seen packet IDs to prevent loops/duplicates.
+    // LinkedHashMap maintains insertion order so removeEldestEntry evicts the oldest entry,
+    // giving true LRU semantics. Access is guarded by the map's own monitor.
+    private val seenPackets = Collections.synchronizedMap(
+        object : LinkedHashMap<String, Unit>(16, 0.75f, false) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Unit>?) =
+                size > 10_000
+        }
+    )
 
     // Pending routed messages: destinationId -> list of packets waiting for route
     private val pendingPackets = ConcurrentHashMap<String, MutableList<MeshPacket>>()
@@ -68,6 +76,13 @@ class MeshNetworkManager @Inject constructor(
 
     private var localNodeId: String = ""
     private var isRunning = false
+
+    /** Returns true if the packet ID was new and was recorded; false if already seen. */
+    private fun addIfNewPacket(packetId: String): Boolean =
+        seenPackets.put(packetId, Unit) == null
+
+    /** Exposes the current local node ID for services that embed it in packets. */
+    fun getLocalNodeId(): String = localNodeId
 
     fun initialize(nodeId: String) {
         localNodeId = nodeId
@@ -251,8 +266,7 @@ class MeshNetworkManager @Inject constructor(
 
     /** Broadcast packet to all connected peers (gossip) */
     private fun broadcastPacket(packet: MeshPacket) {
-        if (seenPackets.contains(packet.packetId)) return
-        seenPackets.add(packet.packetId)
+        if (!addIfNewPacket(packet.packetId)) return
 
         activeConnections.keys.forEach { endpointId ->
             scope.launch { transmitToEndpoint(endpointId, packet) }
@@ -281,12 +295,11 @@ class MeshNetworkManager @Inject constructor(
             val json = String(bytes, Charsets.UTF_8)
             val packet = gson.fromJson(json, MeshPacket::class.java)
 
-            // Deduplication
-            if (seenPackets.contains(packet.packetId)) {
+            // Deduplication: atomically record the packet; drop if already seen
+            if (!addIfNewPacket(packet.packetId)) {
                 Log.v(TAG, "Duplicate packet ${packet.packetId}, dropping")
                 return
             }
-            seenPackets.add(packet.packetId)
 
             Log.d(TAG, "Received packet type=${packet.payloadType} from=$fromEndpointId dest=${packet.destinationId}")
 
@@ -413,7 +426,6 @@ class MeshNetworkManager @Inject constructor(
             while (isRunning) {
                 delay(HEARTBEAT_INTERVAL_MS)
                 sendHeartbeat()
-                cleanupSeenPackets()
                 peerRepository.markStaleAsDisconnected(STALE_PEER_THRESHOLD_MS)
             }
         }
@@ -505,18 +517,6 @@ class MeshNetworkManager @Inject constructor(
                     payload = gson.toJson(msg).toByteArray()
                 )
                 sendPacket(packet)
-            }
-        }
-    }
-
-    /** Limit seen packets cache size to prevent memory growth */
-    private fun cleanupSeenPackets() {
-        if (seenPackets.size > 10_000) {
-            // Remove oldest 5000 entries (approximation)
-            val iter = seenPackets.iterator()
-            var count = 0
-            while (iter.hasNext() && count < 5000) {
-                iter.next(); iter.remove(); count++
             }
         }
     }

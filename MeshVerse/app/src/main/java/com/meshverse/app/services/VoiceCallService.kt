@@ -92,10 +92,9 @@ class VoiceCallService : Service() {
         scope.launch {
             meshNetworkManager.meshEvents.collect { event ->
                 if (event is com.meshverse.app.mesh.MeshEvent.PacketReceived &&
-                    event.packet.payloadType == PacketType.MESSAGE) {
-                    // In a real impl, filter audio packets and play
-                    // Here we just log
-                    Log.v(TAG, "Audio chunk received from mesh")
+                    event.packet.payloadType == PacketType.VOICE_AUDIO) {
+                    val pcm = event.packet.payload
+                    audioTrack?.write(pcm, 0, pcm.size)
                 }
             }
         }
@@ -135,11 +134,12 @@ class VoiceCallService : Service() {
     }
 
     private suspend fun sendAudioChunk(chunk: ByteArray) {
+        val nodeId = meshNetworkManager.getLocalNodeId()
         val packet = MeshPacket(
-            sourceId = "local",  // Will be replaced with actual nodeId
+            sourceId = nodeId,
             destinationId = targetPeerId,
-            senderId = "local",
-            payloadType = PacketType.MESSAGE,
+            senderId = nodeId,
+            payloadType = PacketType.VOICE_AUDIO,
             payload = chunk,
             ttl = 3  // Low TTL for real-time audio
         )
