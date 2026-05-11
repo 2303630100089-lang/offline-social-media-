@@ -1,0 +1,9 @@
+flowchart TB
+    UI[Compose UI] --> VM[ViewModels]
+    VM --> REPO[Repositories]
+    REPO --> DB[(Room DB)]
+    REPO --> MESH[MeshNetworkManager]
+    MESH --> TRANSPORT[Nearby / BLE / Wi-Fi Direct]
+    UI --> MINIAPP[WebView Mini App Engine]
+    UI --> MAPS[Offline Map + POI]
+    UI --> AI[Local AI Command Router]
