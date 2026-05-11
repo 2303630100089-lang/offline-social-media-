@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Colors -->
+    <color name="primary">#00D4FF</color>
+    <color name="primary_dark">#0099CC</color>
+    <color name="primary_light">#66E6FF</color>
+
+    <!-- Accent Colors -->
+    <color name="accent">#FF00FF</color>
+    <color name="accent_light">#FF66FF</color>
+    <color name="accent_dark">#CC00CC</color>
+
+    <!-- Background Colors -->
+    <color name="background">#0A0E27</color>
+    <color name="surface">#141B2E</color>
+    <color name="surface_variant">#1F2742</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0BEC5</color>
+    <color name="text_tertiary">#78909C</color>
+
+    <!-- Status Colors -->
+    <color name="success">#00C853</color>
+    <color name="warning">#FFA726</color>
+    <color name="error">#E53935</color>
+    <color name="info">#29B6F6</color>
+
+    <!-- Glass Effect -->
+    <color name="glass_light">#FFFFFF</color>
+    <color name="glass_dark">#000000</color>
+</resources>

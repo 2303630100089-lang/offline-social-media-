@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MeshVerse</string>
+    <string name="app_tagline">Offline-First Decentralized Super App</string>
+
+    <!-- Navigation -->
+    <string name="nav_chats">Chats</string>
+    <string name="nav_social">Social</string>
+    <string name="nav_maps">Maps</string>
+    <string name="nav_ai">AI</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Common Actions -->
+    <string name="action_send">Send</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_share">Share</string>
+    <string name="action_save">Save</string>
+    <string name="action_retry">Retry</string>
+
+    <!-- Walkie Talkie -->
+    <string name="walkie_talkie_hold_to_talk">Hold to Talk</string>
+    <string name="walkie_talkie_recording">Recording...</string>
+    <string name="walkie_talkie_sending">Sending...</string>
+    <string name="walkie_talkie_failed">Failed to send</string>
+
+    <!-- Mesh Network -->
+    <string name="mesh_connecting">Connecting to mesh...</string>
+    <string name="mesh_connected">Connected</string>
+    <string name="mesh_disconnected">Disconnected</string>
+    <string name="mesh_peers">Nearby Peers</string>
+    <string name="mesh_no_peers">No peers nearby</string>
+
+    <!-- Messages -->
+    <string name="message_sending">Sending...</string>
+    <string name="message_sent">Sent</string>
+    <string name="message_delivered">Delivered</string>
+    <string name="message_read">Read</string>
+    <string name="message_failed">Failed to send</string>
+    <string name="message_queued">Queued (offline)</string>
+
+    <!-- Errors -->
+    <string name="error_no_network">No network connection</string>
+    <string name="error_bluetooth_disabled">Bluetooth is disabled</string>
+    <string name="error_location_disabled">Location is disabled</string>
+    <string name="error_permission_denied">Permission denied</string>
+    <string name="error_encryption_failed">Encryption failed</string>
+
+    <!-- Permissions -->
+    <string name="perm_bluetooth_required">Bluetooth is required for mesh networking</string>
+    <string name="perm_location_required">Location is required for peer discovery</string>
+    <string name="perm_audio_required">Audio permission required for walkie-talkie</string>
+
+</resources>
