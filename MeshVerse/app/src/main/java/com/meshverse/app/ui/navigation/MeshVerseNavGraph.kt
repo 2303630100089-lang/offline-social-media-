@@ -23,6 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -122,7 +125,9 @@ private fun MoreScreen(navController: NavHostController) {
         options.forEach { (label, route) ->
             Text(
                 text = label,
-                modifier = Modifier.clickable { navController.navigate(route) }
+                modifier = Modifier
+                    .semantics { role = Role.Button }
+                    .clickable { navController.navigate(route) }
             )
         }
     }

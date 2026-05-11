@@ -19,7 +19,7 @@ object MiniAppWebViewFactory {
         webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val url = request?.url?.toString().orEmpty()
-                return !url.startsWith("file:///android_asset/miniapps/")
+                return !(url.startsWith("file:///android_asset/miniapps/") && !url.contains(".."))
             }
         }
         addJavascriptInterface(MiniAppBridge(context), "MeshVerseBridge")

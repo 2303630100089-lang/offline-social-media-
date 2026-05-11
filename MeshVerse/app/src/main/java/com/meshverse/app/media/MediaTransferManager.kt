@@ -5,6 +5,8 @@ import com.google.gson.Gson
 import com.meshverse.app.domain.model.MeshPacket
 import com.meshverse.app.domain.model.PacketType
 import com.meshverse.app.mesh.MeshNetworkManager
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
@@ -49,6 +51,7 @@ class MediaTransferManager @Inject constructor(
         val source = meshNetworkManager.getLocalNodeId().ifBlank { "local-node" }
 
         for (index in 0 until total) {
+            currentCoroutineContext().ensureActive()
             val start = index * chunkSize
             val end = minOf(start + chunkSize, data.size)
             val chunk = data.copyOfRange(start, end)

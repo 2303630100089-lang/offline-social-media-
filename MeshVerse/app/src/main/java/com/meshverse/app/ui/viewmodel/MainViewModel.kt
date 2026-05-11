@@ -134,6 +134,7 @@ class MainViewModel @Inject constructor(
                         tags = Regex("""(?:^|\s)#([A-Za-z0-9_]+)""")
                             .findAll(text)
                             .map { it.groupValues[1] }
+                            .take(20)
                             .toList()
                     )
             )
