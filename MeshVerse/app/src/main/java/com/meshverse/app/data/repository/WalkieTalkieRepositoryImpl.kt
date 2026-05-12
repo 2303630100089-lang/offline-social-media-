@@ -43,7 +43,7 @@ class WalkieTalkieRepositoryImpl @Inject constructor(
     private fun WalkieTalkieRoomEntity.toDomain(): WalkieTalkieRoom {
         val memberType = object : TypeToken<List<String>>() {}.type
         val members: List<String> = runCatching {
-            gson.fromJson<List<String>>(memberIdsJson, memberType).orEmpty()
+            gson.fromJson<List<String>?>(memberIdsJson, memberType) ?: emptyList()
         }.getOrDefault(emptyList())
         return WalkieTalkieRoom(
             roomId = roomId,

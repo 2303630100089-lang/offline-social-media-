@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.security.SecureRandom
+import java.util.Base64
 import java.util.UUID
 import javax.inject.Inject
 
@@ -145,6 +147,7 @@ class MainViewModel @Inject constructor(
         if (username.isBlank()) return
         viewModelScope.launch {
             val id = localUser.value?.userId ?: UUID.randomUUID().toString()
+            val generatedPublicKey = ByteArray(32).also { SecureRandom().nextBytes(it) }
             userRepository.saveUser(
                 User(
                     userId = id,
@@ -153,7 +156,7 @@ class MainViewModel @Inject constructor(
                     avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = "local-$id",
+                    publicKey = Base64.getEncoder().encodeToString(generatedPublicKey),
                     deviceFingerprint = "local"
                 )
             )
