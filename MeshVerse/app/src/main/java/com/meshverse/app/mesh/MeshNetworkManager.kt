@@ -274,13 +274,25 @@ class MeshNetworkManager @Inject constructor(
     }
 
     private suspend fun transmitToEndpoint(endpointId: String, packet: MeshPacket) {
-        try {
-            val json = gson.toJson(packet)
-            val payload = Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
-            connectionsClient.sendPayload(endpointId, payload)
-            Log.v(TAG, "Sent packet ${packet.packetId} to $endpointId")
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to transmit to $endpointId: ${e.message}")
+        val maxAttempts = 3
+        var lastError: Exception? = null
+        repeat(maxAttempts) { attempt ->
+            try {
+                val json = gson.toJson(packet)
+                val payload = Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
+                connectionsClient.sendPayload(endpointId, payload)
+                Log.v(TAG, "Sent packet ${packet.packetId} to $endpointId")
+                return
+            } catch (e: Exception) {
+                lastError = e
+                if (attempt < maxAttempts - 1) {
+                    delay((100L * (attempt + 1)) * (attempt + 1))
+                }
+            }
+        }
+        Log.e(TAG, "Failed to transmit to $endpointId after $maxAttempts attempts: ${lastError?.message}")
+        if (packet.destinationId != BROADCAST) {
+            sendRouteError(endpointId)
         }
     }
 
@@ -314,6 +326,9 @@ class MeshNetworkManager @Inject constructor(
                     if (packet.destinationId == localNodeId || packet.destinationId == BROADCAST) {
                         // Deliver to local handlers
                         _meshEvents.value = MeshEvent.PacketReceived(packet)
+                        if (packet.destinationId == BROADCAST && packet.ttl > 0) {
+                            relayBroadcastPacket(packet, fromEndpointId)
+                        }
                     } else if (packet.ttl > 0) {
                         // Relay: decrement TTL and forward
                         val relayPacket = packet.copy(
@@ -330,6 +345,24 @@ class MeshNetworkManager @Inject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Error processing packet from $fromEndpointId: ${e.message}")
         }
+    }
+
+    /**
+     * Re-broadcast packet to neighbours (except sender) for multi-hop DTN propagation.
+     * Keeps packetId unchanged for network-wide deduplication.
+     */
+    private fun relayBroadcastPacket(packet: MeshPacket, fromEndpointId: String) {
+        val relayPacket = packet.copy(
+            ttl = packet.ttl - 1,
+            hopCount = packet.hopCount + 1,
+            senderId = localNodeId
+        )
+        activeConnections.keys
+            .asSequence()
+            .filter { it != fromEndpointId }
+            .forEach { endpointId ->
+                scope.launch { transmitToEndpoint(endpointId, relayPacket) }
+            }
     }
 
     // ===== AODV Routing =====
