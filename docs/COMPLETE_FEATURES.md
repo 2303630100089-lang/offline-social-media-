@@ -35,7 +35,7 @@
 ### Data Management
 - ✅ Offline synchronization
 - ✅ Local-first encrypted database
-- ��� CRDT-style distributed sync
+- ✅ CRDT-style distributed sync
 - ✅ Distributed caching
 - ✅ Delta synchronization
 - ✅ Local data replication

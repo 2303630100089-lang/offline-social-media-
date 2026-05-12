@@ -38,6 +38,8 @@ enum class PacketType {
     KEY_EXCHANGE,      // Diffie-Hellman key exchange
     ACK,               // Delivery acknowledgement
     MEDIA_CHUNK,       // Chunked media transfer
+    GOSSIP_DELTA,      // CRDT/gossip delta sync payload
+    WALKIE_GROUP,      // Walkie-talkie room control packet
     GOSSIP,            // Gossip protocol sync
     VOICE_AUDIO        // Push-to-talk audio chunk
 }
