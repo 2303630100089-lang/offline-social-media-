@@ -18,6 +18,7 @@ import com.meshverse.app.domain.repository.PeerRepository
 import com.meshverse.app.domain.repository.PostRepository
 import com.meshverse.app.domain.repository.UserRepository
 import com.meshverse.app.mesh.MeshNetworkManager
+import com.meshverse.app.security.KeyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,7 @@ class MainViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository,
     private val meshNetworkManager: MeshNetworkManager,
+    private val keyManager: KeyManager,
     private val gson: Gson
 ) : ViewModel() {
 
@@ -145,15 +147,17 @@ class MainViewModel @Inject constructor(
         if (username.isBlank()) return
         viewModelScope.launch {
             val id = localUser.value?.userId ?: UUID.randomUUID().toString()
+            val publicKey = keyManager.getPublicKeyBase64()
             userRepository.saveUser(
                 User(
                     userId = id,
                     username = username,
                     displayName = username,
+                    avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = null,
-                    deviceFingerprint = "local"
+                    publicKey = publicKey,
+                    deviceFingerprint = keyManager.generateDeviceFingerprint(publicKey)
                 )
             )
         }
