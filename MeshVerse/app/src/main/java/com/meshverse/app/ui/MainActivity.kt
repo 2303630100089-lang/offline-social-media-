@@ -2,6 +2,7 @@ package com.meshverse.app.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,6 +20,9 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    companion object {
+        private const val TAG = "MainActivity"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -53,6 +57,8 @@ class MainActivity : ComponentActivity() {
     private fun safeStartForegroundService(intent: Intent) {
         runCatching {
             ContextCompat.startForegroundService(this, intent)
+        }.onFailure { throwable ->
+            Log.e(TAG, "Unable to start foreground service: ${intent.component?.className}", throwable)
         }
     }
 }
