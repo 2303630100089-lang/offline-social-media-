@@ -18,14 +18,13 @@ import com.meshverse.app.domain.repository.PeerRepository
 import com.meshverse.app.domain.repository.PostRepository
 import com.meshverse.app.domain.repository.UserRepository
 import com.meshverse.app.mesh.MeshNetworkManager
+import com.meshverse.app.security.KeyManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.security.SecureRandom
-import java.util.Base64
 import java.util.UUID
 import javax.inject.Inject
 
@@ -37,12 +36,9 @@ class MainViewModel @Inject constructor(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository,
     private val meshNetworkManager: MeshNetworkManager,
+    private val keyManager: KeyManager,
     private val gson: Gson
 ) : ViewModel() {
-    companion object {
-        private val secureRandom = SecureRandom()
-    }
-
 
     val conversations = conversationRepository.getAllConversations()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -151,7 +147,7 @@ class MainViewModel @Inject constructor(
         if (username.isBlank()) return
         viewModelScope.launch {
             val id = localUser.value?.userId ?: UUID.randomUUID().toString()
-            val randomKeyMaterial = ByteArray(32).also { secureRandom.nextBytes(it) }
+            val publicKey = keyManager.getPublicKeyBase64()
             userRepository.saveUser(
                 User(
                     userId = id,
@@ -160,8 +156,8 @@ class MainViewModel @Inject constructor(
                     avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = Base64.getEncoder().encodeToString(randomKeyMaterial),
-                    deviceFingerprint = "local"
+                    publicKey = publicKey,
+                    deviceFingerprint = keyManager.generateDeviceFingerprint(publicKey)
                 )
             )
         }
