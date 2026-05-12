@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.meshverse.app.services.MeshService
 import com.meshverse.app.services.SyncService
@@ -25,12 +26,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         // Start mesh and sync services
-        startForegroundService(
+        safeStartForegroundService(
             Intent(this, MeshService::class.java).apply {
                 action = MeshService.ACTION_START
             }
         )
-        startForegroundService(Intent(this, SyncService::class.java))
+        safeStartForegroundService(Intent(this, SyncService::class.java))
 
         setContent {
             MeshVerseTheme {
@@ -47,5 +48,11 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         // Keep services running in background even when activity is destroyed
+    }
+
+    private fun safeStartForegroundService(intent: Intent) {
+        runCatching {
+            ContextCompat.startForegroundService(this, intent)
+        }
     }
 }
