@@ -39,6 +39,10 @@ class MainViewModel @Inject constructor(
     private val meshNetworkManager: MeshNetworkManager,
     private val gson: Gson
 ) : ViewModel() {
+    companion object {
+        private val secureRandom = SecureRandom()
+    }
+
 
     val conversations = conversationRepository.getAllConversations()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -147,7 +151,7 @@ class MainViewModel @Inject constructor(
         if (username.isBlank()) return
         viewModelScope.launch {
             val id = localUser.value?.userId ?: UUID.randomUUID().toString()
-            val generatedPublicKey = ByteArray(32).also { SecureRandom().nextBytes(it) }
+            val randomKeyMaterial = ByteArray(32).also { secureRandom.nextBytes(it) }
             userRepository.saveUser(
                 User(
                     userId = id,
@@ -156,7 +160,7 @@ class MainViewModel @Inject constructor(
                     avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = Base64.getEncoder().encodeToString(generatedPublicKey),
+                    publicKey = Base64.getEncoder().encodeToString(randomKeyMaterial),
                     deviceFingerprint = "local"
                 )
             )
