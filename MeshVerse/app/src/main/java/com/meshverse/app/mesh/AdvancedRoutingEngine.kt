@@ -107,7 +107,6 @@ class AdvancedRoutingEngine @Inject constructor() {
         if (direct != null) return direct
 
         return candidates
-            .filter { it.peerId != destinationId }
             .map { peer -> peer to computeScore(peer, destLatitude, destLongitude) }
             .filter { (_, score) -> score >= MIN_LINK_QUALITY }
             .maxByOrNull { (_, score) -> score }

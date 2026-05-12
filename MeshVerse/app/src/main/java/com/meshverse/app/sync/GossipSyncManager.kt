@@ -142,11 +142,10 @@ class GossipSyncManager @Inject constructor(
         val since = System.currentTimeMillis() - POST_SYNC_WINDOW_MS
         postRepository.getUnSyncedPosts(since).forEach { post ->
             val delta = GossipDelta("POST", gson.toJson(post))
-            val peerIdList = peers.map { it.peerId }
             peers.forEach { peer ->
                 sendDelta(nodeId, peer, delta)
             }
-            postRepository.markPostSynced(post.postId, gson.toJson(peerIdList))
+            postRepository.markPostSynced(post.postId, gson.toJson(peers.map { it.peerId }))
         }
     }
 

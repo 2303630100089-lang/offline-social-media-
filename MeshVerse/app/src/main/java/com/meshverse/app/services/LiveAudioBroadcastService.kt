@@ -105,8 +105,9 @@ class LiveAudioBroadcastService : Service() {
             val buffer = ByteArray(BUFFER_SIZE)
             while (isBroadcasting) {
                 val bytesRead = audioRecord?.read(buffer, 0, BUFFER_SIZE) ?: 0
-                if (bytesRead > 0) {
-                    sendBroadcastChunk(buffer.copyOf(bytesRead))
+                when {
+                    bytesRead > 0 -> sendBroadcastChunk(buffer.copyOf(bytesRead))
+                    bytesRead < 0 -> Log.e(TAG, "AudioRecord read error: $bytesRead")
                 }
             }
         }
@@ -165,7 +166,7 @@ class LiveAudioBroadcastService : Service() {
 
     private fun handleIncomingBroadcast(payload: ByteArray) {
         // Parse channel prefix: "[channelId]\n" + PCM data
-        val newline = payload.indexOf('\n'.code.toByte())
+        val newline = payload.indexOf('\n'.toByte())
         if (newline < 0) return
         val incomingChannel = String(payload, 0, newline, Charsets.UTF_8)
         if (incomingChannel != broadcastChannelId) return
