@@ -35,4 +35,10 @@ interface PostDao {
 
     @Query("DELETE FROM posts WHERE expiresAt IS NOT NULL AND expiresAt < :now")
     suspend fun deleteExpiredPosts(now: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM posts WHERE syncedPeerIds IS NULL AND timestamp > :since ORDER BY timestamp DESC LIMIT 50")
+    suspend fun getUnSyncedPosts(since: Long): List<PostEntity>
+
+    @Query("UPDATE posts SET syncedPeerIds = :peerIds WHERE postId = :postId")
+    suspend fun markPostSynced(postId: String, peerIds: String)
 }

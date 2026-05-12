@@ -117,6 +117,13 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!-- Live Audio Broadcast Service (Phase 2) -->
+        <service
+            android:name=".services.LiveAudioBroadcastService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
         <!-- Hilt WorkManager initializer -->
         <provider
             android:name="androidx.startup.InitializationProvider"

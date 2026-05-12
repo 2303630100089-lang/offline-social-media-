@@ -12,4 +12,7 @@ interface PostRepository {
     suspend fun upvote(postId: String)
     suspend fun downvote(postId: String)
     suspend fun cleanExpiredPosts()
+    suspend fun getUnSyncedPosts(since: Long = System.currentTimeMillis() - 86_400_000L): List<Post>
+    suspend fun markPostSynced(postId: String, peerIds: String)
+    suspend fun mergePostFromPeer(post: Post)
 }
