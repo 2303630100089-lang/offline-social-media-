@@ -12,7 +12,11 @@ interface ConversationDao {
     @Update
     suspend fun update(conversation: ConversationEntity)
 
-    @Query("SELECT * FROM conversations WHERE isArchived = 0 ORDER BY isPinned DESC, lastMessageAt DESC NULLS LAST")
+    @Query(
+        "SELECT * FROM conversations " +
+            "WHERE isArchived = 0 " +
+            "ORDER BY isPinned DESC, (lastMessageAt IS NULL) ASC, lastMessageAt DESC"
+    )
     fun getAllActive(): Flow<List<ConversationEntity>>
 
     @Query("SELECT * FROM conversations WHERE conversationId = :id")
