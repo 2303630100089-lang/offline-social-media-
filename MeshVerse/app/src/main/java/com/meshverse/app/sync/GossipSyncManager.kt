@@ -222,32 +222,42 @@ class GossipSyncManager @Inject constructor(
 
     private fun compressToBase64(data: ByteArray): String {
         val deflater = Deflater(Deflater.BEST_SPEED)
-        deflater.setInput(data)
-        deflater.finish()
-        val buffer = ByteArray(STREAM_BUFFER_BYTES)
-        val output = ByteArrayOutputStream()
-        while (!deflater.finished()) {
-            val count = deflater.deflate(buffer)
-            output.write(buffer, 0, count)
+        return try {
+            deflater.setInput(data)
+            deflater.finish()
+            val buffer = ByteArray(STREAM_BUFFER_BYTES)
+            val output = ByteArrayOutputStream()
+            while (!deflater.finished()) {
+                val count = deflater.deflate(buffer)
+                if (count <= 0) break
+                output.write(buffer, 0, count)
+            }
+            Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+        } finally {
+            deflater.end()
         }
-        deflater.end()
-        return Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
     }
 
     private fun inflateFromBase64(base64: String): ByteArray {
         return try {
             val compressed = Base64.decode(base64, Base64.NO_WRAP)
             val inflater = Inflater()
-            inflater.setInput(compressed)
-            val buffer = ByteArray(STREAM_BUFFER_BYTES)
-            val output = ByteArrayOutputStream()
-            while (!inflater.finished()) {
-                val count = inflater.inflate(buffer)
-                if (count <= 0) break
-                output.write(buffer, 0, count)
+            try {
+                inflater.setInput(compressed)
+                val buffer = ByteArray(STREAM_BUFFER_BYTES)
+                val output = ByteArrayOutputStream()
+                while (!inflater.finished()) {
+                    val count = inflater.inflate(buffer)
+                    if (count > 0) {
+                        output.write(buffer, 0, count)
+                    } else if (inflater.needsInput()) {
+                        break
+                    }
+                }
+                output.toByteArray()
+            } finally {
+                inflater.end()
             }
-            inflater.end()
-            output.toByteArray()
         } catch (e: Exception) {
             Log.w(TAG, "Failed to inflate gossip payload, using decoded bytes fallback: ${e.message}")
             Base64.decode(base64, Base64.NO_WRAP)

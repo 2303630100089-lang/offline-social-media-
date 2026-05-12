@@ -294,14 +294,14 @@ class MeshNetworkManager @Inject constructor(
         Log.e(TAG, "Failed to transmit to $endpointId after $MAX_TRANSMIT_RETRIES attempts: ${lastError?.message}")
         if (packet.destinationId != BROADCAST) {
             // Broadcast delivery is opportunistic by design; route errors are only meaningful for unicast paths.
-            // endpointId is the failed next-hop endpoint; route invalidation should target that hop.
+            // endpointId is the failed immediate neighbor hop (not packet.destinationId).
             sendRouteError(endpointId)
         }
     }
 
     private fun calculateRetryBackoff(attempt: Int): Long {
-        val retryMultiplier = attempt + 1
-        return RETRY_BACKOFF_BASE_MS * retryMultiplier * retryMultiplier
+        val attemptNumber = attempt + 1
+        return RETRY_BACKOFF_BASE_MS * attemptNumber * attemptNumber
     }
 
     /**
