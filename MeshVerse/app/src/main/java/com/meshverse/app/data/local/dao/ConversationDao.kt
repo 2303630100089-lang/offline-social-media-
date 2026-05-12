@@ -15,7 +15,7 @@ interface ConversationDao {
     @Query(
         "SELECT * FROM conversations " +
             "WHERE isArchived = 0 " +
-            "ORDER BY isPinned DESC, CASE WHEN lastMessageAt IS NULL THEN 1 ELSE 0 END, lastMessageAt DESC"
+            "ORDER BY isPinned DESC, CASE WHEN lastMessageAt IS NULL THEN 0 ELSE 1 END DESC, lastMessageAt DESC"
     )
     fun getAllActive(): Flow<List<ConversationEntity>>
 
