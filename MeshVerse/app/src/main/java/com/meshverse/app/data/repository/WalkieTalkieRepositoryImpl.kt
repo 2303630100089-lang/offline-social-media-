@@ -1,6 +1,7 @@
 package com.meshverse.app.data.repository
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.meshverse.app.data.local.dao.WalkieTalkieRoomDao
 import com.meshverse.app.data.local.entity.WalkieTalkieRoomEntity
 import com.meshverse.app.domain.model.ChannelType
@@ -40,8 +41,9 @@ class WalkieTalkieRepositoryImpl @Inject constructor(
     // ── Mapping ────────────────────────────────────────────────────────────
 
     private fun WalkieTalkieRoomEntity.toDomain(): WalkieTalkieRoom {
+        val memberType = object : TypeToken<List<String>>() {}.type
         val members: List<String> = runCatching {
-            gson.fromJson(memberIdsJson, Array<String>::class.java)?.toList().orEmpty()
+            gson.fromJson<List<String>>(memberIdsJson, memberType).orEmpty()
         }.getOrDefault(emptyList())
         return WalkieTalkieRoom(
             roomId = roomId,

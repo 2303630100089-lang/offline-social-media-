@@ -153,7 +153,7 @@ class MainViewModel @Inject constructor(
                     avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = "",
+                    publicKey = "local-$id",
                     deviceFingerprint = "local"
                 )
             )
