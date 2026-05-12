@@ -45,6 +45,7 @@ class MeshNetworkManager @Inject constructor(
         private const val HEARTBEAT_INTERVAL_MS = 15_000L
         private const val ROUTE_TTL_MS = 300_000L  // 5 minutes
         private const val STALE_PEER_THRESHOLD_MS = 60_000L
+        private const val MAX_TRANSMIT_RETRIES = 3
         private const val RETRY_BACKOFF_BASE_MS = 100L
 
         // Broadcast address
@@ -275,9 +276,8 @@ class MeshNetworkManager @Inject constructor(
     }
 
     private suspend fun transmitToEndpoint(endpointId: String, packet: MeshPacket) {
-        val maxAttempts = 3
         var lastError: Exception? = null
-        repeat(maxAttempts) { attempt ->
+        repeat(MAX_TRANSMIT_RETRIES) { attempt ->
             try {
                 val json = gson.toJson(packet)
                 val payload = Payload.fromBytes(json.toByteArray(Charsets.UTF_8))
@@ -286,22 +286,22 @@ class MeshNetworkManager @Inject constructor(
                 return
             } catch (e: Exception) {
                 lastError = e
-                if (attempt < maxAttempts - 1) {
+                if (attempt < MAX_TRANSMIT_RETRIES - 1) {
                     delay(calculateRetryBackoff(attempt))
                 }
             }
         }
-        Log.e(TAG, "Failed to transmit to $endpointId after $maxAttempts attempts: ${lastError?.message}")
+        Log.e(TAG, "Failed to transmit to $endpointId after $MAX_TRANSMIT_RETRIES attempts: ${lastError?.message}")
         if (packet.destinationId != BROADCAST) {
             // Broadcast delivery is opportunistic by design; route errors are only meaningful for unicast paths.
-            // We invalidate routes through the failed next-hop endpoint, not the final destination.
+            // endpointId is the failed next-hop endpoint; route invalidation should target that hop.
             sendRouteError(endpointId)
         }
     }
 
     private fun calculateRetryBackoff(attempt: Int): Long {
-        val retryIndex = attempt + 1
-        return RETRY_BACKOFF_BASE_MS * retryIndex * retryIndex
+        val retryMultiplier = attempt + 1
+        return RETRY_BACKOFF_BASE_MS * retryMultiplier * retryMultiplier
     }
 
     /**

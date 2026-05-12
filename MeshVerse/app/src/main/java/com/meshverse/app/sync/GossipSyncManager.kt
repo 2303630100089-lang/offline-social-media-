@@ -60,6 +60,7 @@ class GossipSyncManager @Inject constructor(
         private const val TAG = "GossipSyncManager"
         private const val GOSSIP_PUSH_INTERVAL_MS = 30_000L
         private const val COMPRESSION_THRESHOLD_BYTES = 512
+        private const val STREAM_BUFFER_BYTES = 1024
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -223,7 +224,7 @@ class GossipSyncManager @Inject constructor(
         val deflater = Deflater(Deflater.BEST_SPEED)
         deflater.setInput(data)
         deflater.finish()
-        val buffer = ByteArray(1024)
+        val buffer = ByteArray(STREAM_BUFFER_BYTES)
         val output = ByteArrayOutputStream()
         while (!deflater.finished()) {
             val count = deflater.deflate(buffer)
@@ -238,7 +239,7 @@ class GossipSyncManager @Inject constructor(
             val compressed = Base64.decode(base64, Base64.NO_WRAP)
             val inflater = Inflater()
             inflater.setInput(compressed)
-            val buffer = ByteArray(1024)
+            val buffer = ByteArray(STREAM_BUFFER_BYTES)
             val output = ByteArrayOutputStream()
             while (!inflater.finished()) {
                 val count = inflater.inflate(buffer)
