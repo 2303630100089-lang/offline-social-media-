@@ -61,6 +61,7 @@ class GossipSyncManager @Inject constructor(
         private const val GOSSIP_PUSH_INTERVAL_MS = 30_000L
         private const val COMPRESSION_THRESHOLD_BYTES = 512
         private const val STREAM_BUFFER_BYTES = 1024
+        private const val POST_SYNC_WINDOW_MS = 24 * 60 * 60 * 1000L // 24 hours
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -136,6 +137,17 @@ class GossipSyncManager @Inject constructor(
             }
             mapReportRepository.markSynced(report.reportId)
         }
+
+        // Push unsynced social feed posts (media propagation)
+        val since = System.currentTimeMillis() - POST_SYNC_WINDOW_MS
+        postRepository.getUnSyncedPosts(since).forEach { post ->
+            val delta = GossipDelta("POST", gson.toJson(post))
+            val peerIdList = peers.map { it.peerId }
+            peers.forEach { peer ->
+                sendDelta(nodeId, peer, delta)
+            }
+            postRepository.markPostSynced(post.postId, gson.toJson(peerIdList))
+        }
     }
 
     private suspend fun sendDelta(nodeId: String, peer: Peer, delta: GossipDelta) {
@@ -184,6 +196,11 @@ class GossipSyncManager @Inject constructor(
                     val report = gson.fromJson(delta.payload, MapReport::class.java)
                     // Increment hop count before storing, then re-propagate
                     mapReportRepository.addReport(report.copy(propagationHops = report.propagationHops + 1))
+                }
+                "POST" -> {
+                    val post = gson.fromJson(delta.payload, com.meshverse.app.domain.model.Post::class.java)
+                    postRepository.mergePostFromPeer(post)
+                    Log.d(TAG, "Merged social post from peer: postId=${post.postId}")
                 }
                 else -> Log.w(TAG, "Unknown gossip delta type: ${delta.type}")
             }

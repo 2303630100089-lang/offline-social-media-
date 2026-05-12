@@ -35,6 +35,15 @@ class PostRepositoryImpl @Inject constructor(
     override suspend fun downvote(postId: String) = postDao.downvote(postId)
     override suspend fun cleanExpiredPosts() = postDao.deleteExpiredPosts()
 
+    override suspend fun getUnSyncedPosts(since: Long): List<Post> =
+        postDao.getUnSyncedPosts(since).map { it.toDomain() }
+
+    override suspend fun markPostSynced(postId: String, peerIds: String) =
+        postDao.markPostSynced(postId, peerIds)
+
+    override suspend fun mergePostFromPeer(post: Post) =
+        postDao.insert(post.toEntity())
+
     private fun PostEntity.toDomain(): Post {
         val tagList: List<String> = tags?.let {
             gson.fromJson(it, object : TypeToken<List<String>>() {}.type)

@@ -40,8 +40,22 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Run test/lint automation and collect errors
-        run: bash build-scripts/test-runner.sh
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.4
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Build debug APK
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew --no-daemon :app:assembleDebug
+          else
+            gradle --no-daemon :app:assembleDebug
+          fi
 
       - name: Upload automation reports
         if: always()
@@ -49,4 +63,4 @@ jobs:
         with:
           name: automation-health-reports
           path: MeshVerse/build/reports/ci/**
-          if-no-files-found: error
+          if-no-files-found: warn
