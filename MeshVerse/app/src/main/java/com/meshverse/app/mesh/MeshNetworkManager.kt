@@ -5,6 +5,7 @@ import android.util.Log
 import com.google.android.gms.nearby.connection.*
 import com.google.gson.Gson
 import com.meshverse.app.domain.model.*
+import com.meshverse.app.domain.model.ConnectionType
 import com.meshverse.app.domain.repository.MeshRepository
 import com.meshverse.app.domain.repository.MessageRepository
 import com.meshverse.app.domain.repository.PeerRepository

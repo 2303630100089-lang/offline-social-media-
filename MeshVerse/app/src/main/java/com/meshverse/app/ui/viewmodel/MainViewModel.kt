@@ -150,9 +150,10 @@ class MainViewModel @Inject constructor(
                     userId = id,
                     username = username,
                     displayName = username,
+                    avatarPath = null,
                     isLocalUser = true,
                     isAnonymous = false,
-                    publicKey = null,
+                    publicKey = "",
                     deviceFingerprint = "local"
                 )
             )

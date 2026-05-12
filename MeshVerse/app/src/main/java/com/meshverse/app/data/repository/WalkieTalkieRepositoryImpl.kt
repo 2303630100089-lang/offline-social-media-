@@ -1,7 +1,6 @@
 package com.meshverse.app.data.repository
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.meshverse.app.data.local.dao.WalkieTalkieRoomDao
 import com.meshverse.app.data.local.entity.WalkieTalkieRoomEntity
 import com.meshverse.app.domain.model.ChannelType
@@ -42,7 +41,7 @@ class WalkieTalkieRepositoryImpl @Inject constructor(
 
     private fun WalkieTalkieRoomEntity.toDomain(): WalkieTalkieRoom {
         val members: List<String> = runCatching {
-            gson.fromJson(memberIdsJson, object : TypeToken<List<String>>() {}.type)
+            gson.fromJson(memberIdsJson, Array<String>::class.java)?.toList().orEmpty()
         }.getOrDefault(emptyList())
         return WalkieTalkieRoom(
             roomId = roomId,
