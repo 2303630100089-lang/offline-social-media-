@@ -45,6 +45,7 @@ class MeshNetworkManager @Inject constructor(
         private const val HEARTBEAT_INTERVAL_MS = 15_000L
         private const val ROUTE_TTL_MS = 300_000L  // 5 minutes
         private const val STALE_PEER_THRESHOLD_MS = 60_000L
+        private const val RETRY_BACKOFF_BASE_MS = 100L
 
         // Broadcast address
         const val BROADCAST = "BROADCAST"
@@ -286,14 +287,21 @@ class MeshNetworkManager @Inject constructor(
             } catch (e: Exception) {
                 lastError = e
                 if (attempt < maxAttempts - 1) {
-                    delay((100L * (attempt + 1)) * (attempt + 1))
+                    delay(calculateRetryBackoff(attempt))
                 }
             }
         }
         Log.e(TAG, "Failed to transmit to $endpointId after $maxAttempts attempts: ${lastError?.message}")
         if (packet.destinationId != BROADCAST) {
+            // Broadcast delivery is opportunistic by design; route errors are only meaningful for unicast paths.
+            // We invalidate routes through the failed next-hop endpoint, not the final destination.
             sendRouteError(endpointId)
         }
+    }
+
+    private fun calculateRetryBackoff(attempt: Int): Long {
+        val retryIndex = attempt + 1
+        return RETRY_BACKOFF_BASE_MS * retryIndex * retryIndex
     }
 
     /**

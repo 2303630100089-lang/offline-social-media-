@@ -145,12 +145,9 @@ class GossipSyncManager @Inject constructor(
         } else {
             plainDeltaJson
         }
-        val encrypted = !peer.publicKey.isNullOrBlank()
-        val body = if (encrypted) {
-            cryptoManager.encrypt(compressedBody, peer.publicKey!!)
-        } else {
-            compressedBody
-        }
+        val peerKey = peer.publicKey?.takeIf { it.isNotBlank() }
+        val encrypted = peerKey != null
+        val body = peerKey?.let { cryptoManager.encrypt(compressedBody, it) } ?: compressedBody
         val envelope = GossipTransportEnvelope(
             encrypted = encrypted,
             compressed = compressed,
@@ -208,7 +205,10 @@ class GossipSyncManager @Inject constructor(
             val senderPublicKey = peerRepository.getConnectedPeersOnce()
                 .firstOrNull { it.peerId == packet.sourceId || it.peerId == packet.senderId }
                 ?.publicKey
-                ?: return null
+                ?: run {
+                    Log.w(TAG, "Skipping encrypted gossip delta: missing sender key for source=${packet.sourceId}")
+                    return null
+                }
             decodedBody = cryptoManager.decrypt(envelope.body, senderPublicKey)
         }
 
@@ -234,18 +234,23 @@ class GossipSyncManager @Inject constructor(
     }
 
     private fun inflateFromBase64(base64: String): ByteArray {
-        val compressed = Base64.decode(base64, Base64.NO_WRAP)
-        val inflater = Inflater()
-        inflater.setInput(compressed)
-        val buffer = ByteArray(1024)
-        val output = ByteArrayOutputStream()
-        while (!inflater.finished()) {
-            val count = inflater.inflate(buffer)
-            if (count <= 0) break
-            output.write(buffer, 0, count)
+        return try {
+            val compressed = Base64.decode(base64, Base64.NO_WRAP)
+            val inflater = Inflater()
+            inflater.setInput(compressed)
+            val buffer = ByteArray(1024)
+            val output = ByteArrayOutputStream()
+            while (!inflater.finished()) {
+                val count = inflater.inflate(buffer)
+                if (count <= 0) break
+                output.write(buffer, 0, count)
+            }
+            inflater.end()
+            output.toByteArray()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to inflate gossip payload, using decoded bytes fallback: ${e.message}")
+            Base64.decode(base64, Base64.NO_WRAP)
         }
-        inflater.end()
-        return output.toByteArray()
     }
 }
 
