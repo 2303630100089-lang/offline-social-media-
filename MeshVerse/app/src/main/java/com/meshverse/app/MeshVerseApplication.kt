@@ -6,13 +6,8 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.meshverse.app.workers.SecurityMaintenanceWorker
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
-import java.util.concurrent.TimeUnit
 
 @HiltAndroidApp
 class MeshVerseApplication : Application(), Configuration.Provider {
@@ -22,8 +17,10 @@ class MeshVerseApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannels()
-        scheduleSecurityMaintenance()
+        runCatching { createNotificationChannels() }
+            .onFailure { throwable ->
+                android.util.Log.e("MeshVerseApplication", "Unable to create notification channels", throwable)
+            }
     }
 
     override val workManagerConfiguration: Configuration
@@ -93,14 +90,5 @@ class MeshVerseApplication : Application(), Configuration.Provider {
         const val CHANNEL_VOICE = "voice_calls"
         const val CHANNEL_EMERGENCY = "emergency"
         const val CHANNEL_SYNC = "sync"
-    }
-
-    private fun scheduleSecurityMaintenance() {
-        val request = PeriodicWorkRequestBuilder<SecurityMaintenanceWorker>(6, TimeUnit.HOURS).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "security-maintenance",
-            ExistingPeriodicWorkPolicy.KEEP,
-            request
-        )
     }
 }
