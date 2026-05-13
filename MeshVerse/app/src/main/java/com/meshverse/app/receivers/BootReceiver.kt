@@ -28,7 +28,7 @@ class BootReceiver : BroadcastReceiver() {
             runCatching {
                 context.startForegroundService(
                     Intent(context, SyncService::class.java)
-                }
+                )
             }.onFailure { throwable ->
                 Log.e(TAG, "Unable to start sync service after boot", throwable)
             }
