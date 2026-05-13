@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.meshverse.app.maps.OfflinePoiProvider
+import com.meshverse.app.ui.theme.MeshGlassCard
 import com.meshverse.app.ui.viewmodel.MainViewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -115,7 +116,7 @@ fun MapScreen(viewModel: MainViewModel) {
             .padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Offline Map + Peer Overlay", style = MaterialTheme.typography.headlineSmall)
+        Text("Mesh Network", style = MaterialTheme.typography.headlineSmall)
         Text(locationStatus, style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.secondary)
 
@@ -181,8 +182,8 @@ fun MapScreen(viewModel: MainViewModel) {
             }
         )
 
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        MeshGlassCard(modifier = Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text("Emergency Overlay", style = MaterialTheme.typography.titleSmall)
                 Text("Hospitals, shelters and crowd reports are available offline through cached tiles + mesh updates.")
             }
