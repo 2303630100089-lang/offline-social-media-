@@ -20,6 +20,7 @@ import com.meshverse.app.ai.LocalAiAssistant
 import com.meshverse.app.data.local.MeshVerseDatabase
 import com.meshverse.app.services.MeshService
 import com.meshverse.app.services.SyncService
+import com.meshverse.app.services.WalkieTalkieShortcutService
 import com.meshverse.app.workers.SecurityMaintenanceWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
@@ -231,6 +232,14 @@ class AppStartupManager @Inject constructor(
                 warnings
             ).also { started -> syncServiceStarted = started }
         }
+
+        startForegroundService(
+            Intent(appContext, WalkieTalkieShortcutService::class.java).apply {
+                action = WalkieTalkieShortcutService.ACTION_START_LISTENING
+            },
+            "walkie shortcut",
+            warnings
+        )
 
         return meshStartedNow && syncStartedNow
     }

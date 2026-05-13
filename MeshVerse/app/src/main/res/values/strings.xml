@@ -7,4 +7,7 @@
     <string name="connecting">Connecting…</string>
     <string name="no_peers">No nearby peers found</string>
     <string name="payment_disclaimer">Prototype only. Not real banking infrastructure.</string>
+    <string name="walkie_shortcut_notification_title">Walkie Shortcut Ready</string>
+    <string name="walkie_shortcut_notification_text">Hold configured hardware button or tile to talk</string>
+    <string name="walkie_recording_notification_text">Recording encrypted voice message…</string>
 </resources>

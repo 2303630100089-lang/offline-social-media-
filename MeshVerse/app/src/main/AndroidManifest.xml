@@ -126,6 +126,38 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
+        <!-- Walkie-talkie shortcut foreground service -->
+        <service
+            android:name=".services.WalkieTalkieShortcutService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- Hardware key accessibility trigger -->
+        <service
+            android:name=".services.WalkieTalkieAccessibilityService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/walkie_accessibility_service_config" />
+        </service>
+
+        <!-- Quick Settings fallback trigger -->
+        <service
+            android:name=".services.WalkieTalkieTileService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
         <!-- Hilt WorkManager initializer -->
         <provider
             android:name="androidx.startup.InitializationProvider"

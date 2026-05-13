@@ -35,5 +35,7 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindCommentRepository(impl: CommentRepositoryImpl): CommentRepository
-}
 
+    @Binds @Singleton
+    abstract fun bindWalkieTalkieRepository(impl: WalkieTalkieRepositoryImpl): WalkieTalkieRepository
+}

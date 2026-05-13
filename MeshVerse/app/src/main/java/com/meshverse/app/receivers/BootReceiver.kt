@@ -6,6 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.meshverse.app.services.MeshService
 import com.meshverse.app.services.SyncService
+import com.meshverse.app.services.WalkieTalkieShortcutService
 
 class BootReceiver : BroadcastReceiver() {
     companion object {
@@ -31,6 +32,15 @@ class BootReceiver : BroadcastReceiver() {
                 )
             }.onFailure { throwable ->
                 Log.e(TAG, "Unable to start sync service after boot", throwable)
+            }
+            runCatching {
+                context.startForegroundService(
+                    Intent(context, WalkieTalkieShortcutService::class.java).apply {
+                        action = WalkieTalkieShortcutService.ACTION_START_LISTENING
+                    }
+                )
+            }.onFailure { throwable ->
+                Log.e(TAG, "Unable to start walkie shortcut service after boot", throwable)
             }
         }
     }
