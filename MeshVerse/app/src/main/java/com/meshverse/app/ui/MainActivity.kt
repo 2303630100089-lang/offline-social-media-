@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,9 @@ import androidx.lifecycle.lifecycleScope
 import com.meshverse.app.startup.AppStartupManager
 import com.meshverse.app.startup.StartupPermissionState
 import com.meshverse.app.ui.navigation.MeshVerseNavGraph
+import com.meshverse.app.ui.theme.MeshGlassCard
+import com.meshverse.app.ui.theme.MeshGradientBackground
+import com.meshverse.app.ui.theme.MeshPrimaryButton
 import com.meshverse.app.ui.theme.MeshVerseTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -107,19 +111,21 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MeshVerseTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainActivityContent(
-                        state = uiState,
-                        onRequestStartupPermissions = ::requestStartupPermissions,
-                        onRequestOptionalPermissions = ::requestOptionalPermissions,
-                        onRequestBackgroundLocation = ::requestBackgroundLocation,
-                        onRequestOverlayPermission = ::requestOverlayPermission,
-                        onContinueAfterOnboarding = ::completeOnboarding,
-                        onRetryStartup = { refreshStartupState(force = true) }
-                    )
+                MeshGradientBackground {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background.copy(alpha = 0.05f)
+                    ) {
+                        MainActivityContent(
+                            state = uiState,
+                            onRequestStartupPermissions = ::requestStartupPermissions,
+                            onRequestOptionalPermissions = ::requestOptionalPermissions,
+                            onRequestBackgroundLocation = ::requestBackgroundLocation,
+                            onRequestOverlayPermission = ::requestOverlayPermission,
+                            onContinueAfterOnboarding = ::completeOnboarding,
+                            onRetryStartup = { refreshStartupState(force = true) }
+                        )
+                    }
                 }
             }
         }
@@ -269,31 +275,42 @@ private fun StartupOnboardingScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Text("Welcome to MeshVerse", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text("Review permissions before startup. You can continue even if you deny optional access; the app will fall back to local-only mode where needed.")
-
-        PermissionSection(
-            title = "Core startup permissions",
-            description = "Needed before mesh scanning, nearby discovery, and foreground sync start.",
-            missingPermissions = state.permissionState.missingStartupPermissions,
-            onGrant = onRequestStartupPermissions,
-            buttonLabel = "Grant core permissions"
+        Text("Welcome to MeshVerse", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+        Text(
+            "To give you full experience, allow nearby, location and media permissions.",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        PermissionSection(
-            title = "Optional media permissions",
-            description = "Camera, microphone, and media access stay disabled until granted.",
-            missingPermissions = state.permissionState.missingOptionalPermissions,
-            onGrant = onRequestOptionalPermissions,
-            buttonLabel = "Grant optional permissions"
-        )
+        MeshGlassCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                PermissionSection(
+                    title = "Nearby permissions",
+                    description = "For finding nearby friends and mesh discovery.",
+                    missingPermissions = state.permissionState.missingStartupPermissions,
+                    onGrant = onRequestStartupPermissions,
+                    buttonLabel = "Grant nearby permissions"
+                )
+            }
+        }
+
+        MeshGlassCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                PermissionSection(
+                    title = "Media permissions",
+                    description = "For files, camera and voice messaging.",
+                    missingPermissions = state.permissionState.missingOptionalPermissions,
+                    onGrant = onRequestOptionalPermissions,
+                    buttonLabel = "Grant media permissions"
+                )
+            }
+        }
 
         PermissionToggleCard(
             title = "Background location",
             granted = state.permissionState.backgroundLocationGranted,
-            description = "Needed for location-aware mesh behavior while the app is not visible on Android 10+.",
+            description = "For location-aware nearby routing when app is minimized.",
             actionLabel = "Grant background location",
             onGrant = onRequestBackgroundLocation
         )
@@ -301,26 +318,27 @@ private fun StartupOnboardingScreen(
         PermissionToggleCard(
             title = "Overlay permission",
             granted = state.permissionState.overlayGranted,
-            description = "Required before any bubble or overlay UI is shown.",
+            description = "For bubble and walkie-talkie overlays.",
             actionLabel = "Grant overlay access",
             onGrant = onRequestOverlayPermission
         )
 
-        Button(
+        MeshPrimaryButton(
+            text = "Continue",
             onClick = onContinue,
             modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Continue to app")
-        }
+        )
     }
 }
 
 @Composable
 private fun StartupLoadingScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            CircularProgressIndicator()
-            Text("Preparing MeshVerse safely…")
+        MeshGlassCard(contentPadding = PaddingValues(horizontal = 24.dp, vertical = 20.dp)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                CircularProgressIndicator()
+                Text("Initializing Mesh Network…")
+            }
         }
     }
 }
@@ -337,14 +355,16 @@ private fun StartupErrorScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Startup failed", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text(error)
-        warnings.forEach { warning ->
-            Text("• $warning")
+        MeshGlassCard(modifier = Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("Startup failed", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Text(error)
+                warnings.forEach { warning ->
+                    Text("• $warning")
+                }
+            }
         }
-        Button(onClick = onRetryStartup, modifier = Modifier.fillMaxWidth()) {
-            Text("Retry startup")
-        }
+        MeshPrimaryButton(text = "Retry startup", onClick = onRetryStartup, modifier = Modifier.fillMaxWidth())
     }
 }
 
@@ -372,9 +392,7 @@ private fun StartupWarningBanner(
         }
 
         if (state.permissionState.missingStartupPermissions.isNotEmpty()) {
-            OutlinedButton(onClick = onRequestStartupPermissions) {
-                Text("Enable mesh permissions")
-            }
+            OutlinedButton(onClick = onRequestStartupPermissions) { Text("Enable mesh permissions") }
         }
 
         if (state.permissionState.missingOptionalPermissions.isNotEmpty()) {
@@ -390,9 +408,7 @@ private fun StartupWarningBanner(
         }
 
         if (!state.permissionState.overlayGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            OutlinedButton(onClick = onRequestOverlayPermission) {
-                Text("Enable overlay access")
-            }
+            OutlinedButton(onClick = onRequestOverlayPermission) { Text("Enable overlay access") }
         }
     }
 }
@@ -409,14 +425,12 @@ private fun PermissionSection(
         Text(title, fontWeight = FontWeight.SemiBold)
         Text(description, style = MaterialTheme.typography.bodySmall)
         if (missingPermissions.isEmpty()) {
-            Text("Already granted")
+            Text("Granted", color = MaterialTheme.colorScheme.secondary)
         } else {
             missingPermissions.forEach { permission ->
                 Text("• ${permissionLabel(permission)}")
             }
-            OutlinedButton(onClick = onGrant) {
-                Text(buttonLabel)
-            }
+            MeshPrimaryButton(text = buttonLabel, onClick = onGrant)
         }
     }
 }
@@ -430,13 +444,13 @@ private fun PermissionToggleCard(
     onGrant: () -> Unit
 ) {
     val currentGrantState by rememberUpdatedState(granted)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(title, fontWeight = FontWeight.SemiBold)
-        Text(description, style = MaterialTheme.typography.bodySmall)
-        Text(if (currentGrantState) "Granted" else "Not granted")
-        if (!currentGrantState) {
-            OutlinedButton(onClick = onGrant) {
-                Text(actionLabel)
+    MeshGlassCard(modifier = Modifier.fillMaxWidth(), contentPadding = PaddingValues(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(description, style = MaterialTheme.typography.bodySmall)
+            Text(if (currentGrantState) "Granted" else "Not granted")
+            if (!currentGrantState) {
+                MeshPrimaryButton(text = actionLabel, onClick = onGrant)
             }
         }
     }

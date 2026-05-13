@@ -1,48 +1,45 @@
 package com.meshverse.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Cyberpunk / dark color palette
-val CyberCyan = Color(0xFF00F5FF)
-val CyberPurple = Color(0xFF7B2FFF)
-val CyberMagenta = Color(0xFFFF006E)
-val CyberYellow = Color(0xFFFFBE0B)
-val DarkBg = Color(0xFF0A0E1A)
-val DarkSurface = Color(0xFF0F1423)
-val DarkSurfaceMid = Color(0xFF1A2035)
-val DarkCard = Color(0xFF1E2640)
+val NeonBlue = Color(0xFF38B6FF)
+val NeonPurple = Color(0xFF8E58FF)
+val NeonViolet = Color(0xFFB055FF)
+val NeonAqua = Color(0xFF2EE6D6)
+val MeshBackground = Color(0xFF040A16)
+val MeshSurface = Color(0xFF0B1527)
+val MeshSurfaceSoft = Color(0xFF121F36)
+val MeshOutline = Color(0xFF2A3650)
 
-private val DarkColorScheme = darkColorScheme(
-    primary = CyberCyan,
-    onPrimary = DarkBg,
-    primaryContainer = Color(0xFF003B4A),
-    onPrimaryContainer = CyberCyan,
-    secondary = CyberPurple,
+private val MeshDarkColors = darkColorScheme(
+    primary = NeonPurple,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFF28184E),
+    onPrimaryContainer = Color(0xFFE7DBFF),
+    secondary = NeonBlue,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFF2D1060),
-    onSecondaryContainer = Color(0xFFD0BAFF),
-    tertiary = CyberMagenta,
-    onTertiary = Color.White,
-    background = DarkBg,
-    onBackground = Color(0xFFE0E8FF),
-    surface = DarkSurface,
-    onSurface = Color(0xFFE0E8FF),
-    surfaceVariant = DarkSurfaceMid,
-    onSurfaceVariant = Color(0xFF9BA8BF),
-    outline = Color(0xFF2A3450),
-    error = Color(0xFFFF4444)
+    secondaryContainer = Color(0xFF102A4A),
+    onSecondaryContainer = Color(0xFFD8E9FF),
+    tertiary = NeonAqua,
+    onTertiary = Color(0xFF03201D),
+    background = MeshBackground,
+    onBackground = Color(0xFFE5EDFF),
+    surface = MeshSurface,
+    onSurface = Color(0xFFE5EDFF),
+    surfaceVariant = MeshSurfaceSoft,
+    onSurfaceVariant = Color(0xFFA7B4CF),
+    outline = MeshOutline,
+    error = Color(0xFFFF5A7A)
 )
 
 @Composable
-fun MeshVerseTheme(
-    darkTheme: Boolean = true, // Always dark (cyberpunk)
-    content: @Composable () -> Unit
-) {
+fun MeshVerseTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = DarkColorScheme,
+        colorScheme = MeshDarkColors,
         typography = Typography(),
         content = content
     )
