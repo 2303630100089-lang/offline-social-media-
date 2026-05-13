@@ -562,8 +562,8 @@ Any other relevant information?
 
 ### Stay Connected
 
-- **GitHub Issues**: Ask questions and discuss features
-- **GitHub Discussions**: Community chat and ideas
+- **GitHub Issues**: [Ask questions and discuss features](https://github.com/2303630100089-lang/offline-social-media-/issues)
+- **GitHub Discussions**: [Community chat and ideas](https://github.com/2303630100089-lang/offline-social-media-/discussions)
 - **Pull Requests**: Share your code and collaborate
 - **Wiki**: Community knowledge base
 
@@ -599,8 +599,8 @@ Contributors will be:
 Don't hesitate to ask:
 
 1. Open a [Discussion](https://github.com/2303630100089-lang/offline-social-media-/discussions)
-2. Join our community chat
-3. Comment on related issues
+2. Join our community chat in [GitHub Discussions](https://github.com/2303630100089-lang/offline-social-media-/discussions)
+3. Comment on related issues in [GitHub Issues](https://github.com/2303630100089-lang/offline-social-media-/issues)
 
 ## 🙏 Thank You!
 
