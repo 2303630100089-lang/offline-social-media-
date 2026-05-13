@@ -6,7 +6,14 @@ import android.app.NotificationManager
 import android.os.Build
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.meshverse.app.workers.MessageRetryWorker
+import com.meshverse.app.workers.PostSyncWorker
 import dagger.hilt.android.HiltAndroidApp
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -21,12 +28,40 @@ class MeshVerseApplication : Application(), Configuration.Provider {
             .onFailure { throwable ->
                 android.util.Log.e("MeshVerseApplication", "Unable to create notification channels", throwable)
             }
+        scheduleBackgroundWorkers()
     }
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    /** Schedule periodic background workers for message retry and post sync. */
+    private fun scheduleBackgroundWorkers() {
+        val workManager = WorkManager.getInstance(this)
+
+        // Retry pending messages every 15 minutes (minimum WorkManager interval)
+        val messageRetryRequest = PeriodicWorkRequestBuilder<MessageRetryWorker>(
+            15, TimeUnit.MINUTES
+        ).addTag(MessageRetryWorker.WORK_NAME).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            MessageRetryWorker.WORK_NAME,
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            messageRetryRequest
+        )
+
+        // Sync feed posts every 30 minutes (relaxed constraints — works offline too)
+        val postSyncRequest = PeriodicWorkRequestBuilder<PostSyncWorker>(
+            30, TimeUnit.MINUTES
+        ).addTag(PostSyncWorker.WORK_NAME).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            PostSyncWorker.WORK_NAME,
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            postSyncRequest
+        )
+    }
 
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -92,3 +127,4 @@ class MeshVerseApplication : Application(), Configuration.Provider {
         const val CHANNEL_SYNC = "sync"
     }
 }
+

@@ -32,4 +32,8 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindMediaRepository(impl: MediaRepositoryImpl): MediaRepository
+
+    @Binds @Singleton
+    abstract fun bindCommentRepository(impl: CommentRepositoryImpl): CommentRepository
 }
+
