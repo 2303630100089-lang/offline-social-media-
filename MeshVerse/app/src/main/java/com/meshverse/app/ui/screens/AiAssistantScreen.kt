@@ -83,7 +83,7 @@ fun AiAssistantScreen(viewModel: MainViewModel) {
                 fileContext = text
                 loadedFileName = it.lastPathSegment ?: "document"
                 response = "📄 Loaded: $loadedFileName\n\nFile contains ${text.length} characters. " +
-                    "Ask me anything about this document, or type 'summarise' to get a summary."
+                    "Ask me anything about this document, or type 'summarize' to get a summary."
             } else {
                 response = "❌ Could not read file. Supported formats: TXT, CSV, JSON, MD."
             }
@@ -185,7 +185,7 @@ fun AiAssistantScreen(viewModel: MainViewModel) {
                     scope.launch {
                         // Build prompt with optional file context
                         val fullPrompt = if (fileContext != null) {
-                            if (inputPrompt.lowercase() == "summarise" || inputPrompt.lowercase() == "summarize") {
+                            if (inputPrompt.lowercase() == "summarize") {
                                 FileContextLoader.buildSummaryPrompt(fileContext!!)
                             } else {
                                 FileContextLoader.buildContextPrompt(fileContext!!, inputPrompt)
@@ -287,7 +287,7 @@ fun AiAssistantScreen(viewModel: MainViewModel) {
                     fontWeight = FontWeight.Bold)
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("1. Download a .gguf model file from HuggingFace (TheBloke / bartowski repos)",
+                        Text("1. Download a .gguf model file from HuggingFace (TheBloke/bartowski repos)",
                             style = MaterialTheme.typography.bodySmall)
                         Text("2. Connect your phone via USB and copy the file to:",
                             style = MaterialTheme.typography.bodySmall)
@@ -303,7 +303,7 @@ fun AiAssistantScreen(viewModel: MainViewModel) {
                             fontWeight = FontWeight.SemiBold)
                         Text("• Tap 'Load File' to open a TXT, CSV, JSON, or Markdown file",
                             style = MaterialTheme.typography.bodySmall)
-                        Text("• Type 'summarise' to get a document summary",
+                        Text("• Type 'summarize' to get a document summary",
                             style = MaterialTheme.typography.bodySmall)
                         Text("• Ask any question to get an answer grounded in the document",
                             style = MaterialTheme.typography.bodySmall)
@@ -408,4 +408,3 @@ private fun simulateInference(prompt: String, modelName: String): String {
         "Your prompt:\n\"$prompt\"\n\n" +
         "Once the inference engine is wired up, responses will appear here."
 }
-

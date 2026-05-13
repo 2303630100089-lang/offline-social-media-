@@ -1,6 +1,7 @@
 package com.meshverse.app.ui.screens
 
 import android.Manifest
+import android.content.pm.PackageManager
 import android.content.Context
 import android.location.Location
 import android.location.LocationListener
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -66,6 +68,10 @@ fun MapScreen(viewModel: MainViewModel) {
     // Start listening for GPS updates using Android LocationManager
     DisposableEffect(locationPermissions.allPermissionsGranted) {
         if (!locationPermissions.allPermissionsGranted) return@DisposableEffect onDispose {}
+        val hasRuntimeLocationPermission =
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        if (!hasRuntimeLocationPermission) return@DisposableEffect onDispose {}
 
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val listener = object : LocationListener {
@@ -73,6 +79,7 @@ fun MapScreen(viewModel: MainViewModel) {
                 deviceLocation = GeoPoint(loc.latitude, loc.longitude)
                 locationStatus = "GPS: %.4f, %.4f".format(loc.latitude, loc.longitude)
             }
+            // Deprecated callback remains for interface compatibility on older API behavior.
             @Deprecated("Deprecated in Java")
             override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
         }
@@ -182,4 +189,3 @@ fun MapScreen(viewModel: MainViewModel) {
         }
     }
 }
-

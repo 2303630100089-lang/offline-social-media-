@@ -30,7 +30,6 @@ class MessageRetryWorker @AssistedInject constructor(
     companion object {
         const val WORK_NAME = "message_retry_worker"
         private const val TAG = "MessageRetryWorker"
-        private const val MAX_RETRY_ATTEMPTS = 5
     }
 
     override suspend fun doWork(): Result {
@@ -55,7 +54,7 @@ class MessageRetryWorker @AssistedInject constructor(
             Result.success()
         }.getOrElse { e ->
             Log.e(TAG, "MessageRetryWorker failed: ${e.message}")
-            if (runAttemptCount < MAX_RETRY_ATTEMPTS) Result.retry() else Result.failure()
+            Result.retry()
         }
     }
 }

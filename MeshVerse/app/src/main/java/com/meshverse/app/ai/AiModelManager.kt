@@ -3,7 +3,6 @@ package com.meshverse.app.ai
 import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
-import android.os.Environment
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -129,7 +128,7 @@ class AiModelManager @Inject constructor() {
             setDescription("AI model for offline use (${model.fileSizeMb} MB)")
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
             setDestinationInExternalFilesDir(context, null, "models/${model.fileName}")
-            setAllowedOverMetered(true)
+            setAllowedOverMetered(false)
             setAllowedOverRoaming(false)
         }
 

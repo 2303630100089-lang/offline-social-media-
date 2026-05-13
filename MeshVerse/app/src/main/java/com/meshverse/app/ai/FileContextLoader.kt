@@ -18,7 +18,9 @@ import java.io.InputStreamReader
  */
 object FileContextLoader {
 
-    private const val MAX_CHARS = 8_000  // Keep context under token limits
+    // Conservative cap to fit low-memory mobile contexts across supported models.
+    // 8,000 chars is roughly ~2,000 tokens in English, leaving room for system/user prompt parts.
+    private const val MAX_CHARS = 8_000
 
     /**
      * Read up to [MAX_CHARS] characters from the given URI and return them
@@ -54,11 +56,11 @@ object FileContextLoader {
     }
 
     /**
-     * Summarise a document by constructing a summarisation prompt.
+     * Summarize a document by constructing a summary prompt.
      */
     fun buildSummaryPrompt(fileContent: String): String {
         return buildString {
-            appendLine("Please summarise the following document concisely:")
+            appendLine("Please summarize the following document concisely:")
             appendLine()
             appendLine(fileContent)
         }

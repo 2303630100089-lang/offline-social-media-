@@ -21,6 +21,7 @@ object DatabaseModule {
     private const val DB_NAME = "meshverse.db"
     private const val PREFS_NAME = "meshverse_db_prefs"
     private const val KEY_DB_PASSPHRASE = "db_passphrase"
+    private val secureRandom = java.security.SecureRandom()
 
     /**
      * Retrieve or generate a random 256-bit passphrase stored in
@@ -39,7 +40,7 @@ object DatabaseModule {
         if (existing != null) {
             return android.util.Base64.decode(existing, android.util.Base64.NO_WRAP)
         }
-        val bytes = ByteArray(32).also { java.security.SecureRandom().nextBytes(it) }
+        val bytes = ByteArray(32).also { secureRandom.nextBytes(it) }
         prefs.edit()
             .putString(KEY_DB_PASSPHRASE, android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
             .apply()
@@ -58,7 +59,7 @@ object DatabaseModule {
             DB_NAME
         )
         .openHelperFactory(factory)
-        .fallbackToDestructiveMigration()
+        .addMigrations(MeshVerseDatabase.MIGRATION_1_2)
         .build()
     }
 
@@ -75,4 +76,3 @@ object DatabaseModule {
     @Provides fun provideWalkieTalkieRoomDao(db: MeshVerseDatabase): WalkieTalkieRoomDao = db.walkieTalkieRoomDao()
     @Provides fun provideCommentDao(db: MeshVerseDatabase): CommentDao = db.commentDao()
 }
-
