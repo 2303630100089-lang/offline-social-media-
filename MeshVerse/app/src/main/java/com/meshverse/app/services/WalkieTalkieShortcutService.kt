@@ -100,7 +100,6 @@ class WalkieTalkieShortcutService : Service() {
     private var isRecording = false
     private var selectedRoomId: String? = null
     private var recordingStream: ByteArrayOutputStream? = null
-    private var lastMediaTransportActionAt = 0L
 
     private val queuePrefs by lazy { getSharedPreferences(PREFS_QUEUE, Context.MODE_PRIVATE) }
     private val tilePrefs by lazy { getSharedPreferences(PREFS_TILE, Context.MODE_PRIVATE) }
@@ -173,23 +172,23 @@ class WalkieTalkieShortcutService : Service() {
                     .build()
             )
             setCallback(object : MediaSession.Callback() {
-                override fun onPlay() {
-                    if (shouldHandleMediaTransportAction()) onButtonPressed()
-                }
-
-                override fun onPause() {
-                    if (shouldHandleMediaTransportAction()) onButtonReleased()
+                override fun onMediaButtonEvent(mediaButtonEvent: Intent): Boolean {
+                    val keyEvent = mediaButtonEvent.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                    val event = keyEvent ?: return false
+                    if (event.repeatCount > 0) return true
+                    if (event.keyCode == android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
+                        event.keyCode == android.view.KeyEvent.KEYCODE_HEADSETHOOK) {
+                        when (event.action) {
+                            android.view.KeyEvent.ACTION_DOWN -> onButtonPressed()
+                            android.view.KeyEvent.ACTION_UP -> onButtonReleased()
+                        }
+                        return true
+                    }
+                    return false
                 }
             })
             isActive = true
         }
-    }
-
-    private fun shouldHandleMediaTransportAction(): Boolean {
-        val now = System.currentTimeMillis()
-        if (now - lastMediaTransportActionAt < 150L) return false
-        lastMediaTransportActionAt = now
-        return true
     }
 
     private fun initOverlay() {
