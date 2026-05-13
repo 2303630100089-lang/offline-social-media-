@@ -3,6 +3,7 @@ package com.meshverse.app.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.meshverse.app.domain.model.Comment
 import com.meshverse.app.domain.model.Conversation
 import com.meshverse.app.domain.model.ConversationType
 import com.meshverse.app.domain.model.Message
@@ -12,6 +13,7 @@ import com.meshverse.app.domain.model.PacketType
 import com.meshverse.app.domain.model.Post
 import com.meshverse.app.domain.model.PostType
 import com.meshverse.app.domain.model.User
+import com.meshverse.app.domain.repository.CommentRepository
 import com.meshverse.app.domain.repository.ConversationRepository
 import com.meshverse.app.domain.repository.MessageRepository
 import com.meshverse.app.domain.repository.PeerRepository
@@ -35,6 +37,7 @@ class MainViewModel @Inject constructor(
     private val peerRepository: PeerRepository,
     private val postRepository: PostRepository,
     private val userRepository: UserRepository,
+    private val commentRepository: CommentRepository,
     private val meshNetworkManager: MeshNetworkManager,
     private val keyManager: KeyManager,
     private val gson: Gson
@@ -143,6 +146,44 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun upvotePost(postId: String) {
+        viewModelScope.launch { postRepository.upvote(postId) }
+    }
+
+    fun downvotePost(postId: String) {
+        viewModelScope.launch { postRepository.downvote(postId) }
+    }
+
+    fun getCommentsForPost(postId: String) =
+        commentRepository.getCommentsForPost(postId)
+
+    fun addComment(postId: String, content: String, parentCommentId: String? = null) {
+        if (content.isBlank()) return
+        viewModelScope.launch {
+            val authorId = localUser.value?.userId ?: "local"
+            val authorName = localUser.value?.displayName ?: "Anonymous"
+            commentRepository.addComment(
+                Comment(
+                    commentId = UUID.randomUUID().toString(),
+                    postId = postId,
+                    authorId = authorId,
+                    authorName = authorName,
+                    content = content,
+                    parentCommentId = parentCommentId,
+                    depth = if (parentCommentId == null) 0 else 1
+                )
+            )
+        }
+    }
+
+    fun upvoteComment(commentId: String) {
+        viewModelScope.launch { commentRepository.upvote(commentId) }
+    }
+
+    fun downvoteComment(commentId: String) {
+        viewModelScope.launch { commentRepository.downvote(commentId) }
+    }
+
     fun saveLocalIdentity(username: String) {
         if (username.isBlank()) return
         viewModelScope.launch {
@@ -163,3 +204,4 @@ class MainViewModel @Inject constructor(
         }
     }
 }
+

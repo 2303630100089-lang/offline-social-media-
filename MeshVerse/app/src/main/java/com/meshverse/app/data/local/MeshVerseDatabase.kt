@@ -15,9 +15,13 @@ import com.meshverse.app.data.local.entity.*
         MeshRouteEntity::class,
         MediaEntity::class,
         WalletEntity::class,
-        TransactionEntity::class
+        TransactionEntity::class,
+        PollEntity::class,
+        PollVoteEntity::class,
+        WalkieTalkieRoomEntity::class,
+        CommentEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class MeshVerseDatabase : RoomDatabase() {
@@ -30,4 +34,8 @@ abstract class MeshVerseDatabase : RoomDatabase() {
     abstract fun mediaDao(): MediaDao
     abstract fun walletDao(): WalletDao
     abstract fun transactionDao(): TransactionDao
+    abstract fun pollDao(): PollDao
+    abstract fun walkieTalkieRoomDao(): WalkieTalkieRoomDao
+    abstract fun commentDao(): CommentDao
 }
+

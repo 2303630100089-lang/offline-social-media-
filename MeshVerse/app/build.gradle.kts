@@ -149,6 +149,10 @@ dependencies {
     // Splash Screen
     implementation(libs.splashscreen)
 
+    // SQLCipher (encrypted Room database)
+    implementation(libs.sqlcipher)
+    implementation(libs.sqlite.ktx)
+
     // Test
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
