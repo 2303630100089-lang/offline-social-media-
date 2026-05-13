@@ -100,6 +100,7 @@ class WalkieTalkieShortcutService : Service() {
     private var isRecording = false
     private var selectedRoomId: String? = null
     private var recordingStream: ByteArrayOutputStream? = null
+    private var lastMediaTransportActionAt = 0L
 
     private val queuePrefs by lazy { getSharedPreferences(PREFS_QUEUE, Context.MODE_PRIVATE) }
     private val tilePrefs by lazy { getSharedPreferences(PREFS_TILE, Context.MODE_PRIVATE) }
@@ -172,14 +173,23 @@ class WalkieTalkieShortcutService : Service() {
                     .build()
             )
             setCallback(object : MediaSession.Callback() {
-                override fun onPlay() = onButtonPressed()
+                override fun onPlay() {
+                    if (shouldHandleMediaTransportAction()) onButtonPressed()
+                }
 
-                override fun onPause() = onButtonReleased()
-
-                override fun onStop() = onButtonReleased()
+                override fun onPause() {
+                    if (shouldHandleMediaTransportAction()) onButtonReleased()
+                }
             })
             isActive = true
         }
+    }
+
+    private fun shouldHandleMediaTransportAction(): Boolean {
+        val now = System.currentTimeMillis()
+        if (now - lastMediaTransportActionAt < 150L) return false
+        lastMediaTransportActionAt = now
+        return true
     }
 
     private fun initOverlay() {
