@@ -172,8 +172,8 @@ class WalkieTalkieShortcutService : Service() {
                     .build()
             )
             setCallback(object : MediaSession.Callback() {
-                override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
-                    val keyEvent = mediaButtonEvent?.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
+                override fun onMediaButtonEvent(mediaButtonEvent: Intent): Boolean {
+                    val keyEvent = mediaButtonEvent.getParcelableExtra<android.view.KeyEvent>(Intent.EXTRA_KEY_EVENT)
                     val event = keyEvent ?: return false
                     if (event.repeatCount > 0) return true
                     if (event.keyCode == android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE ||
