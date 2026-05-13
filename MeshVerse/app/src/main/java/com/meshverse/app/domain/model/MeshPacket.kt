@@ -41,5 +41,6 @@ enum class PacketType {
     GOSSIP_DELTA,      // CRDT/gossip delta sync payload
     WALKIE_GROUP,      // Walkie-talkie room control packet
     GOSSIP,            // Gossip protocol sync
-    VOICE_AUDIO        // Push-to-talk audio chunk
+    VOICE_AUDIO,       // Push-to-talk audio chunk
+    WALKIE_AUDIO       // Encrypted walkie-talkie voice message
 }
